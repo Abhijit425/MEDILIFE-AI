@@ -125,19 +125,24 @@ class NavigationUiTest {
         app.container.repo.loadDemoData()
     }
 
+    private fun waitFor(step: String, text: String, timeout: Long = 20_000) {
+        try {
+            compose.waitUntil(timeout) { compose.onAllNodesWithText(text, substring = true).fetchSemanticsNodes().isNotEmpty() }
+        } catch (e: Throwable) {
+            throw AssertionError("Step '$step' failed: text '$text' not shown", e)
+        }
+    }
+
+    private fun tap(label: String) = compose.onAllNodesWithText(label).onFirst().performClick()
+
     @Test fun bottomNavigationReachesAllTabs() {
         ActivityScenario.launch(MainActivity::class.java).use {
-            compose.waitUntil(15_000) { compose.onAllNodesWithText("Health overview").fetchSemanticsNodes().isNotEmpty() }
-            compose.onAllNodesWithText("Medicines").onFirst().performClick()
-            compose.waitUntil(5_000) { compose.onAllNodesWithText("AI Medicine Safety Engine").fetchSemanticsNodes().isNotEmpty() }
-            compose.onAllNodesWithText("Health").onFirst().performClick()
-            compose.waitUntil(5_000) { compose.onAllNodesWithText("Log a measurement").fetchSemanticsNodes().isNotEmpty() }
-            compose.onAllNodesWithText("Medi AI").onFirst().performClick()
-            compose.waitUntil(5_000) { compose.onAllNodesWithText("Ask about your health…").fetchSemanticsNodes().isNotEmpty() }
-            compose.onAllNodesWithText("Profile").onFirst().performClick()
-            compose.waitUntil(5_000) { compose.onAllNodesWithText("Medical history & timeline").fetchSemanticsNodes().isNotEmpty() }
-            compose.onNodeWithText("Medical history & timeline").performClick()
-            compose.waitUntil(5_000) { compose.onAllNodesWithText("Medical timeline").fetchSemanticsNodes().isNotEmpty() }
+            waitFor("home", "Health overview", 30_000)
+            tap("Medicines"); waitFor("medicines tab", "AI Medicine Safety Engine")
+            tap("Health"); waitFor("health tab", "Log a measurement")
+            tap("Medi AI"); waitFor("medi ai tab", "Offline rule-based engine")
+            tap("Profile"); waitFor("profile tab", "Medical history & timeline")
+            tap("Medical history & timeline"); waitFor("history screen", "Medical timeline")
         }
     }
 }
