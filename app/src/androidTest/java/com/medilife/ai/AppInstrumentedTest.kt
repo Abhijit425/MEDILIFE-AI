@@ -142,7 +142,7 @@ class NavigationUiTest {
             tap("Health"); waitFor("health tab", "Log a measurement")
             tap("Medi AI"); waitFor("medi ai tab", "Offline rule-based engine")
             tap("Profile"); waitFor("profile tab", "Medical history & timeline")
-            tap("Medical history & timeline"); waitFor("history screen", "Medical timeline")
+            tap("Medical history & timeline"); waitFor("history screen", "Medical conditions")
         }
     }
 }
