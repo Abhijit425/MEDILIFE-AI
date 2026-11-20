@@ -77,7 +77,6 @@ import com.medilife.ai.ui.components.SourceBadge
 import com.medilife.ai.ui.components.fmtDateTime
 import com.medilife.ai.ui.theme.LocalMedi
 import com.medilife.ai.ui.theme.Palette
-import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.Date
@@ -90,7 +89,13 @@ fun HomeScreen(vm: MediViewModel, go: (String) -> Unit) {
     val alerts by vm.alerts.collectAsState()
     val wellness by vm.wellness.collectAsState()
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    LaunchedEffect(Unit) { while (true) { delay(30_000); now = System.currentTimeMillis() } }
+    // Clock tick via the main Handler (a coroutine delay loop would keep UI tests from idling).
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        val h = android.os.Handler(android.os.Looper.getMainLooper())
+        val r = object : Runnable { override fun run() { now = System.currentTimeMillis(); h.postDelayed(this, 30_000) } }
+        h.postDelayed(r, 30_000)
+        onDispose { h.removeCallbacks(r) }
+    }
     var addType by remember { mutableStateOf<String?>(null) }
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { visible = true }
